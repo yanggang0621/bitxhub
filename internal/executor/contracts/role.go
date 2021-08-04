@@ -641,6 +641,16 @@ func (rm *RoleManager) isAdmin(roleId string, roleType RoleType) bool {
 	}
 }
 
+func (rm *RoleManager) IsAnyAdmin(roleId string) *boltvm.Response {
+	role := &Role{}
+	ok := rm.GetObject(rm.roleKey(roleId), role)
+	if !ok {
+		return boltvm.Success([]byte(strconv.FormatBool(false)))
+	}
+
+	return boltvm.Success([]byte(strconv.FormatBool(true)))
+}
+
 func (rm *RoleManager) GetRoleWeight(roleId string) *boltvm.Response {
 	role := &Role{}
 	ok := rm.GetObject(rm.roleKey(roleId), role)
