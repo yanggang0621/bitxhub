@@ -169,7 +169,7 @@ func (x *InterchainManager) HandleIBTP(ibtp *pb.IBTP) *boltvm.Response {
 	}
 
 	// ProcessIBTP should always executed even if checkTargetAppchainAvailability failed
-	appchainErr := x.checkTargetAppchainAvailability(ibtp)
+	//appchainErr := x.checkTargetAppchainAvailability(ibtp)
 
 	res := boltvm.Success(nil)
 
@@ -185,9 +185,9 @@ func (x *InterchainManager) HandleIBTP(ibtp *pb.IBTP) *boltvm.Response {
 
 	x.ProcessIBTP(ibtp, interchain)
 
-	if appchainErr != nil {
-		return boltvm.Error(appchainErr.Error())
-	}
+	//if appchainErr != nil {
+	//	return boltvm.Error(appchainErr.Error())
+	//}
 
 	return res
 }
@@ -491,9 +491,7 @@ func (x *InterchainManager) checkUnionIBTP(app *appchainMgr.Appchain, ibtp *pb.I
 			}
 		}
 	}
-
-	_, err := verifyMultiSign(app, ibtp, ibtp.Proof)
-	return err
+	return nil
 }
 
 // verifyMultiSign .
