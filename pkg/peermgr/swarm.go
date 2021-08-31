@@ -113,10 +113,12 @@ func (swarm *Swarm) init() error {
 		return fmt.Errorf("create p2p: %w", err)
 	}
 	swarm.localID = swarm.repo.NetworkConfig.ID
+	swarm.enablePing = swarm.repo.Config.Ping.Enable
+	swarm.pingTimeout = swarm.repo.Config.Ping.Duration
 	swarm.p2p = p2p
 	swarm.pingC = make(chan *repo.Ping)
-	swarm.routers=routers
-	swarm.multiAddrs=multiAddrs
+	swarm.routers = routers
+	swarm.multiAddrs = multiAddrs
 	if swarm.piers == nil {
 		swarm.piers = newPiers()
 	}
