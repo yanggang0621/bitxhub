@@ -458,7 +458,7 @@ func (am *AppchainManager) UpdateAppchain(id, name, desc string, trustRoot []byt
 			if _, err := types.HexDecodeString(addr); err != nil {
 				return boltvm.Error(fmt.Sprintf("illegal admin addr: %s", addr))
 			}
-			if chainID, err := am.getChainIdByAdminAddr(addr); err == nil {
+			if chainID, err := am.getChainIdByAdminAddr(addr); err == nil && chainID != id {
 				return boltvm.Error(fmt.Sprintf("the admin addr is already occupied by appchain %s", chainID))
 			}
 		}

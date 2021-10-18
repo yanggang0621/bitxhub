@@ -36,12 +36,14 @@ func (rm *RuleManager) checkPermission(permissions []string, appchainID string, 
 			if !res.Ok {
 				return fmt.Errorf("cross invoke GetAppchainAdmin error:%s", string(res.Result))
 			}
-			role := &Role{}
-			if err := json.Unmarshal(res.Result, role); err != nil {
+			roles := []*Role{}
+			if err := json.Unmarshal(res.Result, &roles); err != nil {
 				return err
 			}
-			if regulatorAddr == role.ID {
-				return nil
+			for _, r := range roles {
+				if regulatorAddr == r.ID {
+					return nil
+				}
 			}
 		case string(PermissionAdmin):
 			res := rm.CrossInvoke(constant.RoleContractAddr.Address().String(), "IsAnyAvailableAdmin",
