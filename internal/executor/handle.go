@@ -55,10 +55,36 @@ func (exec *BlockExecutor) processExecuteEvent(blockWrapper *BlockWrapper) *ledg
 		txHashList = append(txHashList, tx.GetHash())
 	}
 
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"time":   time.Now().UnixNano(),
+	}).Debug("============================== 1. verify proofs 【start】")
 	exec.verifyProofs(blockWrapper)
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"time":   time.Now().UnixNano(),
+	}).Debug("============================== 1. verify proofs 【end】")
+
 	exec.evm = newEvm(block.Height(), uint64(block.BlockHeader.Timestamp), exec.evmChainCfg, exec.ledger.StateLedger, exec.ledger.ChainLedger, exec.admins[0])
 	exec.ledger.PrepareBlock(block.BlockHash, block.Height())
+
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"time":   time.Now().UnixNano(),
+	}).Debug("============================== 2. apply transaction 【start】")
 	receipts := exec.txsExecutor.ApplyTransactions(block.Transactions.Transactions, blockWrapper.invalidTx)
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"time":   time.Now().UnixNano(),
+	}).Debug("============================== 2. apply transaction 【end】")
 
 	applyTxsDuration.Observe(float64(time.Since(current)) / float64(time.Second))
 	exec.logger.WithFields(logrus.Fields{
@@ -67,15 +93,39 @@ func (exec *BlockExecutor) processExecuteEvent(blockWrapper *BlockWrapper) *ledg
 	}).Debug("Apply transactions elapsed")
 
 	calcMerkleStart := time.Now()
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"time":   time.Now().UnixNano(),
+	}).Debug("============================== 3. build tx merkle tree 【start】")
 	l1Root, l2Roots, err := exec.buildTxMerkleTree(block.Transactions.Transactions)
 	if err != nil {
 		panic(err)
 	}
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"time":   time.Now().UnixNano(),
+	}).Debug("============================== 3. build tx merkle tree 【end】")
 
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"time":   time.Now().UnixNano(),
+	}).Debug("============================== 4. calc receipt merkle root 【start】")
 	receiptRoot, err := exec.calcReceiptMerkleRoot(receipts)
 	if err != nil {
 		panic(err)
 	}
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"time":   time.Now().UnixNano(),
+	}).Debug("============================== 4. calc receipt merkle root 【end】")
 
 	calcMerkleDuration.Observe(float64(time.Since(calcMerkleStart)) / float64(time.Second))
 
@@ -84,6 +134,12 @@ func (exec *BlockExecutor) processExecuteEvent(blockWrapper *BlockWrapper) *ledg
 		panic(err)
 	}
 
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"time":   time.Now().UnixNano(),
+	}).Debug("============================== 5. calc timeout l2 root 【start】")
 	var timeoutL2Roots []types.Hash
 	timeoutCounter := make(map[string]*pb.StringSlice)
 	for from, list := range timeoutIBTPsMap {
@@ -94,6 +150,12 @@ func (exec *BlockExecutor) processExecuteEvent(blockWrapper *BlockWrapper) *ledg
 		timeoutCounter[from] = &pb.StringSlice{Slice: list}
 		timeoutL2Roots = append(timeoutL2Roots, root)
 	}
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"time":   time.Now().UnixNano(),
+	}).Debug("============================== 5. calc timeout l2 root 【end】")
 
 	timeoutRoots := make([]merkletree.Content, 0, len(timeoutL2Roots))
 	sort.Slice(timeoutL2Roots, func(i, j int) bool {
@@ -103,10 +165,22 @@ func (exec *BlockExecutor) processExecuteEvent(blockWrapper *BlockWrapper) *ledg
 		r := root
 		timeoutRoots = append(timeoutRoots, &r)
 	}
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"time":   time.Now().UnixNano(),
+	}).Debug("============================== 6. calc merkle root 【start】")
 	timeoutRoot, err := calcMerkleRoot(timeoutRoots)
 	if err != nil {
 		panic(err)
 	}
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"time":   time.Now().UnixNano(),
+	}).Debug("============================== 6. calc merkle root 【end】")
 
 	multiTxIBTPsMap, err := exec.getMultiTxIBTPsMap(block.BlockHeader.Number)
 	if err != nil {

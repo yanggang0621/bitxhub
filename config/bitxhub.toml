@@ -1,6 +1,6 @@
 title = "BitXHub configuration file"
 
-solo = false
+solo = true
 
 [port]
   jsonrpc = 8881
@@ -22,7 +22,7 @@ solo = false
     allowed_origins = ["*"]
 
 [ping]
-  enable = true
+  enable = false
   duration = "15s"
 
 [security]
@@ -34,22 +34,22 @@ solo = false
 
 [limiter]
   interval= "50ms"
-  quantum= 500
-  capacity= 10000
+  quantum= 50000
+  capacity= 1000000
 
 [appchain]
   enable = false
   eth_header_path="appchain/eth_header.json"
 
 [log]
-  level = "info"
+  level = "debug"
   dir = "logs"
   filename = "bitxhub.log"
   report_caller = false
   [log.module]
     p2p = "info"
     consensus = "info"
-    executor = "info"
+    executor = "debug"
     router = "info"
     api = "info"
     coreapi = "info"
@@ -63,7 +63,7 @@ solo = false
   ca_cert_path = "certs/ca.cert"
 
 [order]
-  type = "raft"
+  type = "solo"
 
 [executor]
   type = "serial"  # opensource version only supports serial type, commercial version supports serial and parallel types

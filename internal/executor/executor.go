@@ -241,6 +241,12 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 	txs := block.Transactions.Transactions
 
 	wg.Add(len(txs))
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(txs),
+		"time":   time.Now().UnixNano(),
+	}).Debug("------------------ check proof start")
 	errM := make(map[int]string)
 	for i, tx := range txs {
 		go func(i int, tx pb.Transaction) {
@@ -253,11 +259,17 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 					invalidTxs = append(invalidTxs, i)
 					errM[i] = err.Error()
 				}
-				exec.logger.WithField("gasUsed", gasUsed).Info("Verify proofs")
+				//exec.logger.WithField("gasUsed", gasUsed).Info("Verify proofs")
 				exec.gasLimit -= gasUsed
 			}
 		}(i, tx)
 	}
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(txs),
+		"time":   time.Now().UnixNano(),
+	}).Debug("------------------ check proof end")
 	wg.Wait()
 
 	for _, i := range invalidTxs {
