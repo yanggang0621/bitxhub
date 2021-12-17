@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/meshplus/bitxhub-kit/types"
+	"github.com/meshplus/bitxhub-model/pb"
 	"io/ioutil"
 	"math/big"
 	"path/filepath"
@@ -54,6 +56,11 @@ type BitXHub struct {
 
 	Ctx    context.Context
 	Cancel context.CancelFunc
+
+	mockledger       *orderBlockLedger
+	currentBlockHash *types.Hash
+
+	delayCh chan *pb.CommitEvent
 }
 
 func NewBitXHub(rep *repo.Repo, orderPath string) (*BitXHub, error) {
@@ -118,7 +125,6 @@ func NewBitXHub(rep *repo.Repo, orderPath string) (*BitXHub, error) {
 	bxh.Cancel = cancel
 	bxh.Order = order
 	bxh.Router = r
-
 	return bxh, nil
 }
 

@@ -22,7 +22,7 @@ solo = false
     allowed_origins = ["*"]
 
 [ping]
-  enable = true
+  enable = false
   duration = "15s"
 
 [security]
@@ -34,8 +34,8 @@ solo = false
 
 [limiter]
   interval= "50ms"
-  quantum= 500
-  capacity= 10000
+  quantum= 50000
+  capacity= 1000000
 
 [appchain]
   enable = false
@@ -63,7 +63,7 @@ solo = false
   ca_cert_path = "certs/ca.cert"
 
 [order]
-  type = "raft"
+  type = "rbft"
 
 [executor]
   type = "serial"  # opensource version only supports serial type, commercial version supports serial and parallel types
@@ -77,7 +77,7 @@ solo = false
 [genesis]
   chainid = 1356
   gas_limit = 0x5f5e100
-  bvm_gas_price = 50000
+  bvm_gas_price = 0
   dider = "0xc7F999b83Af6DF9e67d0a37Ee7e900bF38b3D013"
   balance = "100000000000000000000000000000000000"
   [[genesis.admins]]
