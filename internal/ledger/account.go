@@ -105,11 +105,13 @@ func (o *SimpleAccount) SetState(key []byte, value []byte) {
 
 func (o *SimpleAccount) setState(key []byte, value []byte) {
 	o.dirtyState.Store(string(key), value)
+	value = nil
 }
 
 // AddState Add account state
 func (o *SimpleAccount) AddState(key []byte, value []byte) {
 	o.dirtyState.Store(string(key), value)
+	value = nil
 }
 
 // SetCodeAndHash Set the contract code and hash

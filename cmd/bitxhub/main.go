@@ -33,6 +33,7 @@ func main() {
 		startCMD(),
 		keyCMD(),
 		versionCMD(),
+		storageCMD(),
 		certCMD,
 		client.LoadClientCMD(),
 	}

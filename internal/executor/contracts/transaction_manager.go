@@ -289,14 +289,14 @@ func (t *TransactionManager) setFSM(state *pb.TransactionStatus, event Transacti
 }
 
 func (t *TransactionManager) addToTimeoutList(height uint64, txId string) {
-	var timeoutList []string
-	ok := t.GetObject(TimeoutKey(height), &timeoutList)
+	var timeoutList string
+	ok, timeoutListByte := t.Get(TimeoutKey(height))
 	if !ok {
-		timeoutList = []string{txId}
+		timeoutList = txId
 	} else {
-		timeoutList = append(timeoutList, txId)
+		timeoutList = string(timeoutListByte) + "," + txId
 	}
-	t.SetObject(TimeoutKey(height), timeoutList)
+	t.Set(TimeoutKey(height), []byte(timeoutList))
 }
 
 func (t *TransactionManager) removeFromTimeoutList(height uint64, txId string) {

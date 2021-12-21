@@ -190,8 +190,6 @@ func (pl *VerifyPool) verifyProof(ibtp *pb.IBTP, proof []byte) (bool, uint64, er
 		return false, 0, fmt.Errorf("get validate address of chain %s failed: %w", chainID, err)
 	}
 
-	fmt.Println(pl.ledger.Copy().GetCode(types.NewAddressByStr(validateAddr)))
-
 	ibtpBytes, err := ibtp.Marshal()
 	if err != nil {
 		return false, 0, fmt.Errorf("marshal ibtp: %w", err)

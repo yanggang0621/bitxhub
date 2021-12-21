@@ -80,6 +80,7 @@ func (b *BoltStubImpl) GetObject(key string, ret interface{}) bool {
 	}
 
 	err := json.Unmarshal(data, ret)
+	data = nil
 	return err == nil
 }
 
@@ -89,6 +90,7 @@ func (b *BoltStubImpl) Set(key string, value []byte) {
 
 func (b *BoltStubImpl) Add(key string, value []byte) {
 	b.ctx.Ledger.AddState(b.ctx.Callee, []byte(key), value)
+	value = nil
 }
 
 func (b *BoltStubImpl) SetObject(key string, value interface{}) {
@@ -98,6 +100,9 @@ func (b *BoltStubImpl) SetObject(key string, value interface{}) {
 	}
 
 	b.Set(key, data)
+
+	data = nil
+	value = nil
 }
 
 func (b *BoltStubImpl) AddObject(key string, value interface{}) {
@@ -107,6 +112,8 @@ func (b *BoltStubImpl) AddObject(key string, value interface{}) {
 	}
 
 	b.Add(key, data)
+
+	data = nil
 }
 
 func (b *BoltStubImpl) Query(prefix string) (bool, [][]byte) {
