@@ -19,10 +19,11 @@ pub extern "C" fn deallocate(pointer: *mut c_void, capacity: usize) {
 }
 
 #[no_mangle]
-pub extern "C" fn start_verify(proof_ptr: *mut c_char, validator_ptr: *mut c_char) -> i32 {
+pub extern "C" fn start_verify(proof_ptr: *mut c_char, validator_ptr: *mut c_char, payload_ptr: *mut c_char) -> i32 {
   let proof = unsafe { CStr::from_ptr(proof_ptr).to_bytes() };
   let validator = unsafe { CStr::from_ptr(validator_ptr).to_bytes() };
-  let res = contract::verify(proof, validator);
+  let payload = unsafe { CStr::from_ptr(payload_ptr).to_bytes() };
+  let res = contract::verify(proof, validator, payload);
 
   return res as i32;
   // 1

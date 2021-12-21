@@ -136,6 +136,7 @@ type Genesis struct {
 	Admins      []*Admin          `json:"admins" toml:"admins"`
 	Strategy    map[string]string `json:"strategy" toml:"strategy"`
 	Dider       string            `json:"dider" toml:"dider"`
+	MeterWasm   bool              `json:"meter_wasm" toml:"meter_wasm"`
 }
 
 type Admin struct {
@@ -228,9 +229,10 @@ func DefaultConfig() (*Config, error) {
 			Type: "serial",
 		},
 		Genesis: Genesis{
-			ChainID:  1,
-			GasLimit: 0x5f5e100,
-			Balance:  "100000000000000000000000000000000000",
+			ChainID:   1,
+			GasLimit:  0x5f5e100,
+			Balance:   "100000000000000000000000000000000000",
+			MeterWasm: true,
 		},
 		Ledger: Ledger{Type: "complex"},
 		Crypto: Crypto{Algorithms: []string{"Secp256k1"}},

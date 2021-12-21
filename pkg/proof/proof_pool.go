@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 
 	appchainMgr "github.com/meshplus/bitxhub-core/appchain-mgr"
 	"github.com/meshplus/bitxhub-core/governance"
@@ -13,7 +14,6 @@ import (
 	"github.com/meshplus/bitxhub-core/validator"
 	"github.com/meshplus/bitxhub-kit/crypto"
 	"github.com/meshplus/bitxhub-kit/crypto/asym/ecdsa"
-	"github.com/meshplus/bitxhub-kit/log"
 	"github.com/meshplus/bitxhub-kit/types"
 	"github.com/meshplus/bitxhub-model/constant"
 	"github.com/meshplus/bitxhub-model/pb"
@@ -41,7 +41,7 @@ type VerifyPool struct {
 var _ Verify = (*VerifyPool)(nil)
 
 func New(ledger *ledger.Ledger, logger logrus.FieldLogger, bxhID, wasmGasLimit uint64) Verify {
-	ve := validator.NewValidationEngine(ledger, &sync.Map{}, log.NewWithModule("validator"), wasmGasLimit)
+	ve := validator.NewValidationEngine(ledger, &sync.Map{}, logger, wasmGasLimit)
 
 	proofPool := &VerifyPool{
 		ledger:    ledger,
@@ -57,10 +57,10 @@ func (pl *VerifyPool) ValidationEngine() validator.Engine {
 	return pl.ve
 }
 
-func (pl *VerifyPool) CheckProof(tx pb.Transaction) (ok bool, gasUsed uint64, err error) {
+func (pl *VerifyPool) CheckProof(tx pb.Transaction, height, index uint64) (ok bool, gasUsed uint64, err error) {
 	ibtp := tx.GetIBTP()
 	if ibtp != nil {
-		ok, gasUsed, err = pl.verifyProof(ibtp, tx.GetExtra())
+		ok, gasUsed, err = pl.verifyProof(ibtp, tx.GetExtra(), height, index)
 		if err != nil {
 			pl.logger.WithFields(logrus.Fields{
 				"hash":  tx.GetHash().String(),
@@ -147,7 +147,14 @@ func recoverSignAddress(sig, digest []byte) (*types.Address, error) {
 	return pubkey.Address()
 }
 
-func (pl *VerifyPool) verifyProof(ibtp *pb.IBTP, proof []byte) (bool, uint64, error) {
+func (pl *VerifyPool) verifyProof(ibtp *pb.IBTP, proof []byte, height, index uint64) (bool, uint64, error) {
+	pl.logger.WithFields(logrus.Fields{
+		"height": height,
+		"index":  index,
+		"time":   time.Now().UnixNano(),
+		"id":     fmt.Sprintf("%s-%s-%s", ibtp.From, ibtp.To, ibtp.Index),
+	}).Debug("------------------ verify prepare start")
+
 	if proof == nil {
 		return false, 0, fmt.Errorf("%s: empty proof", ProofError)
 	}
@@ -190,12 +197,21 @@ func (pl *VerifyPool) verifyProof(ibtp *pb.IBTP, proof []byte) (bool, uint64, er
 		return false, 0, fmt.Errorf("get validate address of chain %s failed: %w", chainID, err)
 	}
 
+	//fmt.Println(pl.ledger.Copy().GetCode(types.NewAddressByStr(validateAddr)))
+
 	ibtpBytes, err := ibtp.Marshal()
 	if err != nil {
 		return false, 0, fmt.Errorf("marshal ibtp: %w", err)
 	}
 
-	ok, gasUsed, err := pl.ve.Validate(validateAddr, chainID, proof, ibtpBytes, string(app.TrustRoot))
+	pl.logger.WithFields(logrus.Fields{
+		"height": height,
+		"index":  index,
+		"time":   time.Now().UnixNano(),
+		"id":     fmt.Sprintf("%s-%s-%s", ibtp.From, ibtp.To, ibtp.Index),
+	}).Debug("------------------ verify prepare end")
+
+	ok, gasUsed, err := pl.ve.Validate(validateAddr, chainID, proof, ibtpBytes, string(app.TrustRoot), index, height)
 	if err != nil {
 		return false, gasUsed, fmt.Errorf("%s: %w", ProofError, err)
 	}

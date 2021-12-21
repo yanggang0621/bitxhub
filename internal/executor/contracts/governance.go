@@ -263,15 +263,15 @@ func (g *Governance) SubmitProposal(from, eventTyp, typ, objId, objLastStatus, r
 	p.IsSpecial = isSpecialProposal(p)
 
 	g.addProposal(p)
-	g.Logger().WithFields(logrus.Fields{
-		"id":         p.Id,
-		"objId":      p.ObjId,
-		"eventTyp":   p.EventType,
-		"typ":        p.Typ,
-		"status":     p.Status,
-		"createtime": p.CreateTime,
-		"extra":      string(p.Extra),
-	}).Debug("submit proposal")
+	//g.Logger().WithFields(logrus.Fields{
+	//	"id":         p.Id,
+	//	"objId":      p.ObjId,
+	//	"eventTyp":   p.EventType,
+	//	"typ":        p.Typ,
+	//	"status":     p.Status,
+	//	"createtime": p.CreateTime,
+	//	"extra":      string(p.Extra),
+	//}).Debug("submit proposal")
 
 	if err := g.postAuditProposalEvent(p.Id); err != nil {
 		return boltvm.Error(boltvm.GovernanceInternalErrCode, fmt.Sprintf(string(boltvm.GovernanceInternalErrMsg), fmt.Sprintf("post audit proposal event error: %v", err)))

@@ -225,6 +225,17 @@ func (rm *RuleManager) registerDefaultRule(chainID, chainType string) error {
 	case appchainMgr.ChainTypeFabric1_4_4:
 		rm.RuleManager.Register(chainID, validator.FabricRuleAddr, "", rm.GetTxTimeStamp(), true)
 		rm.RuleManager.Register(chainID, validator.SimFabricRuleAddr, "", rm.GetTxTimeStamp(), true)
+		rm.RuleManager.Register(chainID, validator.Fab10RuleAddr, "", rm.GetTxTimeStamp(), true)
+		rm.RuleManager.Register(chainID, validator.Fab20RuleAddr, "", rm.GetTxTimeStamp(), true)
+		rm.RuleManager.Register(chainID, validator.Fab50RuleAddr, "", rm.GetTxTimeStamp(), true)
+		rm.RuleManager.Register(chainID, validator.Fab100RuleAddr, "", rm.GetTxTimeStamp(), true)
+		rm.RuleManager.Register(chainID, validator.Fab200RuleAddr, "", rm.GetTxTimeStamp(), true)
+		rm.RuleManager.Register(chainID, validator.Fab400RuleAddr, "", rm.GetTxTimeStamp(), true)
+		rm.RuleManager.Register(chainID, validator.Fab600RuleAddr, "", rm.GetTxTimeStamp(), true)
+		rm.RuleManager.Register(chainID, validator.Fab800RuleAddr, "", rm.GetTxTimeStamp(), true)
+		rm.RuleManager.Register(chainID, validator.Fab1000RuleAddr, "", rm.GetTxTimeStamp(), true)
+		rm.RuleManager.Register(chainID, validator.Fab1500RuleAddr, "", rm.GetTxTimeStamp(), true)
+		rm.RuleManager.Register(chainID, validator.Fab2000RuleAddr, "", rm.GetTxTimeStamp(), true)
 	case appchainMgr.ChainTypeHyperchain1_8_3:
 	case appchainMgr.ChainTypeHyperchain1_8_6:
 	case appchainMgr.ChainTypeFlato1_0_0:

@@ -24,7 +24,7 @@ use protobuf::ProtobufEnum as ProtobufEnum_imported_for_functions;
 
 /// Generated files are compatible only with the same version
 /// of protobuf runtime.
-const _PROTOBUF_VERSION_CHECK: () = ::protobuf::VERSION_2_10_1;
+const _PROTOBUF_VERSION_CHECK: () = ::protobuf::VERSION_2_23_0;
 
 #[derive(PartialEq,Clone,Default)]
 pub struct TransactionAction {

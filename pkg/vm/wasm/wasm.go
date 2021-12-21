@@ -8,11 +8,12 @@ import (
 	"fmt"
 	"sync"
 
+	metering "github.com/meshplus/go-wasm-metering"
+
 	"github.com/meshplus/bitxhub-core/wasm"
 	"github.com/meshplus/bitxhub-core/wasm/wasmlib"
 	"github.com/meshplus/bitxhub-kit/types"
 	"github.com/meshplus/bitxhub/pkg/vm"
-	metering "github.com/meshplus/go-wasm-metering"
 	"github.com/sirupsen/logrus"
 	"github.com/wasmerio/wasmer-go/wasmer"
 )
@@ -44,7 +45,7 @@ type Contract struct {
 }
 
 // New creates a wasm vm instance
-func New(ctx *vm.Context, imports wasmlib.WasmImport, instances map[string]*wasmer.Instance) (*WasmVM, error) {
+func New(ctx *vm.Context, imports wasmlib.WasmImport, instances map[string]*wasmer.Instance, logger logrus.FieldLogger) (*WasmVM, error) {
 	wasmVM := &WasmVM{
 		ctx: ctx,
 	}
@@ -60,7 +61,7 @@ func New(ctx *vm.Context, imports wasmlib.WasmImport, instances map[string]*wasm
 		syncInstances.Store(k, instance)
 	}
 
-	w, err := wasm.New(contractByte, imports, &syncInstances)
+	w, err := wasm.New(contractByte, imports, &syncInstances, logger)
 	if err != nil {
 		return nil, fmt.Errorf("init wasm failed: %w", err)
 	}
@@ -101,31 +102,34 @@ func (w *WasmVM) deploy() ([]byte, uint64, error) {
 		return nil, 0, fmt.Errorf("contract cannot be empty")
 	}
 
-	var (
-		metaChan = make(chan []byte)
-		err      error
-	)
-
-	go func(err error) {
-		defer func() {
-			if e := recover(); e != nil {
-				err = fmt.Errorf("%v", e)
-			}
-		}()
-
-		meteredCode, _, err := metering.MeterWASM(w.ctx.TransactionData.Payload, &metering.Options{}, w.ctx.Logger)
-		metaChan <- meteredCode
-	}(err)
-	meteredCode := <-metaChan
-	if err != nil {
-		return nil, 0, err
+	deployCode := w.ctx.TransactionData.Payload
+	w.ctx.Logger.WithFields(logrus.Fields{}).Infof("MeterWASM switch is %v", w.ctx.MeterWasm)
+	if w.ctx.MeterWasm {
+		var (
+			metaChan = make(chan []byte)
+			err      error
+		)
+		go func(err error) {
+			defer func() {
+				if e := recover(); e != nil {
+					err = fmt.Errorf("%v", e)
+				}
+			}()
+			meteredCode, _, err := metering.MeterWASM(w.ctx.TransactionData.Payload, &metering.Options{}, w.ctx.Logger)
+			metaChan <- meteredCode
+		}(err)
+		meteredCode := <-metaChan
+		if err != nil {
+			return nil, 0, err
+		}
+		deployCode = meteredCode
 	}
 
 	contractNonce := w.ctx.Ledger.GetNonce(w.ctx.Caller)
 
 	contractAddr := createAddress(w.ctx.Caller, contractNonce)
 	wasmStruct := &Contract{
-		Code: meteredCode,
+		Code: deployCode,
 		Hash: *types.NewHash(w.ctx.TransactionData.Payload),
 	}
 	wasmByte, err := json.Marshal(wasmStruct)

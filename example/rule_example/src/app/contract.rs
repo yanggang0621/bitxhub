@@ -5,7 +5,11 @@
 // use crate::model::transaction;
 // use sha2::{Digest, Sha256};
 
-pub fn verify(proof: &[u8], validator: &[u8]) -> bool {
+pub fn verify(proof: &[u8], validator: &[u8], payload: &[u8]) -> bool {
+    let mut number = 0;
+    while number != 2000 {
+        number += 1;
+    }
   // let cap =
   //   protobuf::parse_from_bytes::<transaction::ChaincodeActionPayload>(proof).expect("error");
   // let cap_act = cap.action.unwrap();

@@ -62,6 +62,7 @@ type BlockExecutor struct {
 	bxhGasPrice *big.Int
 	lock        *sync.Mutex
 	admins      []string
+	meterWasm   bool
 }
 
 func (exec *BlockExecutor) GetBoltContracts() map[string]agency.Contract {
@@ -98,6 +99,7 @@ func New(chainLedger *ledger.Ledger, logger logrus.FieldLogger, client *appchain
 		bxhGasPrice:      gasPrice,
 		gasLimit:         config.GasLimit,
 		lock:             &sync.Mutex{},
+		meterWasm:        config.MeterWasm,
 	}
 
 	for _, admin := range config.Genesis.Admins {
@@ -247,12 +249,13 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 		"txNum":  len(txs),
 		"time":   time.Now().UnixNano(),
 	}).Debug("------------------ check proof start")
+	height := block.Height()
 	errM := make(map[int]string)
 	for i, tx := range txs {
 		go func(i int, tx pb.Transaction) {
 			defer wg.Done()
 			if _, ok := blockWrapper.invalidTx[i]; !ok {
-				ok, gasUsed, err := exec.ibtpVerify.CheckProof(tx)
+				ok, gasUsed, err := exec.ibtpVerify.CheckProof(tx, height, uint64(i))
 				if !ok {
 					lock.Lock()
 					defer lock.Unlock()
@@ -264,13 +267,13 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 			}
 		}(i, tx)
 	}
+	wg.Wait()
 	exec.logger.WithFields(logrus.Fields{
 		"height": block.Height(),
 		"size":   block.Size(),
 		"txNum":  len(txs),
 		"time":   time.Now().UnixNano(),
 	}).Debug("------------------ check proof end")
-	wg.Wait()
 
 	for _, i := range invalidTxs {
 		blockWrapper.invalidTx[i] = agency.InvalidReason(errM[i])

@@ -547,7 +547,7 @@ func (exec *BlockExecutor) applyBxhTransaction(i int, tx *pb.BxhTransaction, inv
 	}
 
 	if tx.IsIBTP() {
-		ctx := vm.NewContext(tx, uint64(i), nil, exec.currentHeight, exec.ledger, exec.logger)
+		ctx := vm.NewContext(tx, uint64(i), nil, exec.currentHeight, exec.ledger, exec.logger, exec.meterWasm)
 		instance := boltvm.New(ctx, exec.validationEngine, exec.evm, exec.getContracts(opt))
 		ret, err := instance.HandleIBTP(tx.GetIBTP())
 		return ret, GasBVMTx, err
@@ -579,14 +579,14 @@ func (exec *BlockExecutor) applyBxhTransaction(i int, tx *pb.BxhTransaction, inv
 		var gasUsed uint64
 		switch data.VmType {
 		case pb.TransactionData_BVM:
-			ctx := vm.NewContext(tx, uint64(i), data, exec.currentHeight, exec.ledger, exec.logger)
+			ctx := vm.NewContext(tx, uint64(i), data, exec.currentHeight, exec.ledger, exec.logger, exec.meterWasm)
 			instance = boltvm.New(ctx, exec.validationEngine, exec.evm, exec.getContracts(opt))
 			gasUsed = GasBVMTx
 		case pb.TransactionData_XVM:
 			var err error
-			ctx := vm.NewContext(tx, uint64(i), data, exec.currentHeight, exec.ledger, exec.logger)
+			ctx := vm.NewContext(tx, uint64(i), data, exec.currentHeight, exec.ledger, exec.logger, exec.meterWasm)
 			imports := vmledger.New()
-			instance, err = wasm.New(ctx, imports, exec.wasmInstances)
+			instance, err = wasm.New(ctx, imports, exec.wasmInstances, exec.logger)
 			if err != nil {
 				return nil, GasFailedTx, err
 			}
@@ -659,7 +659,7 @@ func (exec *BlockExecutor) evmInterchain(i int, tx *types2.EthTransaction, recei
 
 	for _, log := range receipt.EvmLogs {
 		if strings.EqualFold(log.Address.String(), constant.InterBrokerContractAddr.String()) {
-			ctx := vm.NewContext(tx, uint64(i), nil, exec.currentHeight, exec.ledger, exec.logger)
+			ctx := vm.NewContext(tx, uint64(i), nil, exec.currentHeight, exec.ledger, exec.logger, exec.meterWasm)
 			instance := boltvm.New(ctx, exec.validationEngine, exec.evm, exec.registerBoltContracts())
 
 			ret, _, err := instance.InvokeBVM(constant.InterBrokerContractAddr.String(), log.Data)
