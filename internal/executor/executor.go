@@ -261,6 +261,10 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 		go func(i int) {
 			defer wg.Done()
 			for j := i * num; j < (i+1)*num; j++ {
+				exec.logger.WithFields(logrus.Fields{
+					"i": i,
+					"j": j,
+				}).Debug("------------------")
 				fmt.Printf("%d %d \n", i, j)
 				if _, ok := blockWrapper.invalidTx[j]; !ok {
 					ok, gasUsed, err := exec.ibtpVerify.CheckProof(txs[j], height, uint64(j))
