@@ -138,6 +138,7 @@ type Genesis struct {
 	Dider       string            `json:"dider" toml:"dider"`
 	MeterWasm   bool              `json:"meter_wasm" toml:"meter_wasm"`
 	VerifyN     uint64            `json:"verify_n" toml:"verify_n"`
+	TestVerify  bool              `json:"test_verify" toml:"test_verify"`
 }
 
 type Admin struct {
@@ -230,11 +231,12 @@ func DefaultConfig() (*Config, error) {
 			Type: "serial",
 		},
 		Genesis: Genesis{
-			ChainID:   1,
-			GasLimit:  0x5f5e100,
-			Balance:   "100000000000000000000000000000000000",
-			MeterWasm: true,
-			VerifyN:   200,
+			ChainID:    1,
+			GasLimit:   0x5f5e100,
+			Balance:    "100000000000000000000000000000000000",
+			MeterWasm:  true,
+			VerifyN:    200,
+			TestVerify: false,
 		},
 		Ledger: Ledger{Type: "complex"},
 		Crypto: Crypto{Algorithms: []string{"Secp256k1"}},

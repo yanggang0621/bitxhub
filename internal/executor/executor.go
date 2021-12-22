@@ -64,6 +64,7 @@ type BlockExecutor struct {
 	admins      []string
 	meterWasm   bool
 	verifyN     uint64
+	testVerify  bool
 }
 
 func (exec *BlockExecutor) GetBoltContracts() map[string]agency.Contract {
@@ -72,7 +73,7 @@ func (exec *BlockExecutor) GetBoltContracts() map[string]agency.Contract {
 
 // New creates executor instance
 func New(chainLedger *ledger.Ledger, logger logrus.FieldLogger, client *appchain.Client, config *repo.Config, gasPrice *big.Int) (*BlockExecutor, error) {
-	ibtpVerify := proof.New(chainLedger, logger, config.ChainID, config.GasLimit)
+	ibtpVerify := proof.New(chainLedger, logger, config.ChainID, config.GasLimit, config.TestVerify)
 
 	txsExecutor, err := agency.GetExecutorConstructor(config.Executor.Type)
 	if err != nil {
@@ -102,6 +103,7 @@ func New(chainLedger *ledger.Ledger, logger logrus.FieldLogger, client *appchain
 		lock:             &sync.Mutex{},
 		meterWasm:        config.MeterWasm,
 		verifyN:          config.VerifyN,
+		testVerify:       config.TestVerify,
 	}
 
 	for _, admin := range config.Genesis.Admins {
@@ -244,13 +246,13 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 	)
 	txs := block.Transactions.Transactions
 
-	exec.logger.WithFields(logrus.Fields{
-		"height": block.Height(),
-		"size":   block.Size(),
-		"txNum":  len(txs),
-		"time":   time.Now().UnixNano(),
-		"n":      exec.verifyN,
-	}).Debug("------------------ check proof start")
+	//exec.logger.WithFields(logrus.Fields{
+	//	"height": block.Height(),
+	//	"size":   block.Size(),
+	//	"txNum":  len(txs),
+	//	"time":   time.Now().UnixNano(),
+	//	"n":      exec.verifyN,
+	//}).Debug("------------------ check proof start")
 	height := block.Height()
 	errM := make(map[int]string)
 
@@ -280,10 +282,10 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 			go func(i int) {
 				defer wg.Done()
 				for j := i * num; j < (i+1)*num; j++ {
-					exec.logger.WithFields(logrus.Fields{
-						"i": i,
-						"j": j,
-					}).Debug("improve verify")
+					//exec.logger.WithFields(logrus.Fields{
+					//	"i": i,
+					//	"j": j,
+					//}).Debug("improve verify")
 					if _, ok := blockWrapper.invalidTx[j]; !ok {
 						ok, gasUsed, err := exec.ibtpVerify.CheckProof(txs[j], height, uint64(j))
 						if !ok {
@@ -304,12 +306,12 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 	}
 
 	wg.Wait()
-	exec.logger.WithFields(logrus.Fields{
-		"height": block.Height(),
-		"size":   block.Size(),
-		"txNum":  len(txs),
-		"time":   time.Now().UnixNano(),
-	}).Debug("------------------ check proof end")
+	//exec.logger.WithFields(logrus.Fields{
+	//	"height": block.Height(),
+	//	"size":   block.Size(),
+	//	"txNum":  len(txs),
+	//	"time":   time.Now().UnixNano(),
+	//}).Debug("------------------ check proof end")
 
 	for _, i := range invalidTxs {
 		blockWrapper.invalidTx[i] = agency.InvalidReason(errM[i])
