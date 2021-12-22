@@ -63,6 +63,7 @@ type BlockExecutor struct {
 	lock        *sync.Mutex
 	admins      []string
 	meterWasm   bool
+	verifyN     uint64
 }
 
 func (exec *BlockExecutor) GetBoltContracts() map[string]agency.Contract {
@@ -100,6 +101,7 @@ func New(chainLedger *ledger.Ledger, logger logrus.FieldLogger, client *appchain
 		gasLimit:         config.GasLimit,
 		lock:             &sync.Mutex{},
 		meterWasm:        config.MeterWasm,
+		verifyN:          config.VerifyN,
 	}
 
 	for _, admin := range config.Genesis.Admins {
@@ -237,11 +239,12 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 
 	var (
 		invalidTxs = make([]int, 0)
-	//	wg         sync.WaitGroup
-	//	lock       sync.Mutex
+		wg         sync.WaitGroup
+		lock       sync.Mutex
 	)
 	txs := block.Transactions.Transactions
 
+	wg.Add(int(exec.verifyN))
 	//wg.Add(len(txs))
 	exec.logger.WithFields(logrus.Fields{
 		"height": block.Height(),
@@ -251,23 +254,48 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 	}).Debug("------------------ check proof start")
 	height := block.Height()
 	errM := make(map[int]string)
-	for i, tx := range txs {
-		//go func(i int, tx pb.Transaction) {/
-		//defer wg.Done()
-		if _, ok := blockWrapper.invalidTx[i]; !ok {
-			ok, gasUsed, err := exec.ibtpVerify.CheckProof(tx, height, uint64(i))
-			if !ok {
-				//lock.Lock()
-				//defer lock.Unlock()
-				invalidTxs = append(invalidTxs, i)
-				errM[i] = err.Error()
+
+	num := len(txs) / int(exec.verifyN)
+	j := 0
+	for i := 0; i < int(exec.verifyN); i++ {
+		go func(i, j int) {
+			defer wg.Done()
+			for ; j < (i+1)*num; j++ {
+				if _, ok := blockWrapper.invalidTx[j]; !ok {
+					ok, gasUsed, err := exec.ibtpVerify.CheckProof(txs[j], height, uint64(j))
+					if !ok {
+						lock.Lock()
+						defer lock.Unlock()
+						invalidTxs = append(invalidTxs, j)
+						errM[j] = err.Error()
+					}
+					//exec.logger.WithField("gasUsed", gasUsed).Info("Verify proofs")
+					exec.gasLimit -= gasUsed
+				}
+				if j >= len(txs) {
+					break
+				}
 			}
-			//exec.logger.WithField("gasUsed", gasUsed).Info("Verify proofs")
-			exec.gasLimit -= gasUsed
-		}
-		//}(i, tx)
+
+		}(i, j)
 	}
-	//wg.Wait()
+	//for i, tx := range txs {
+	//	go func(i int, tx pb.Transaction) {
+	//		defer wg.Done()
+	//		if _, ok := blockWrapper.invalidTx[i]; !ok {
+	//			ok, gasUsed, err := exec.ibtpVerify.CheckProof(tx, height, uint64(i))
+	//			if !ok {
+	//				lock.Lock()
+	//				defer lock.Unlock()
+	//				invalidTxs = append(invalidTxs, i)
+	//				errM[i] = err.Error()
+	//			}
+	//			//exec.logger.WithField("gasUsed", gasUsed).Info("Verify proofs")
+	//			exec.gasLimit -= gasUsed
+	//		}
+	//	}(i, tx)
+	//}
+	wg.Wait()
 	exec.logger.WithFields(logrus.Fields{
 		"height": block.Height(),
 		"size":   block.Size(),

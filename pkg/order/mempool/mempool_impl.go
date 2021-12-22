@@ -93,7 +93,7 @@ func (mpi *mempoolImpl) ProcessTransactions(txs []pb.Transaction, isLeader, isLo
 	dirtyAccounts := mpi.txStore.insertTxs(validTxs, isLocal)
 
 	mpi.logger.Errorf("mempool size is %d", uint64(len(mpi.txStore.txHashMap)))
-	// send tx to mempool store
+	// send tx to mempool storemm
 	mpi.processDirtyAccount(dirtyAccounts)
 
 	// if no timedBlock, generator batch by block size

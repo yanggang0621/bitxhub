@@ -202,7 +202,7 @@ func testStorage(ctx *cli.Context) error {
 		}
 		time1 := time.Now()
 		for i, tx := range txs {
-			vmCtx := vm.NewContext(tx, uint64(i), nil, uint64(height), rwLdg, testLogger, false)
+			vmCtx := vm.NewContext(tx, uint64(i), nil, uint64(height), rwLdg, testLogger, false, 5)
 			instance := boltvm.New(vmCtx, nil, nil, contracts)
 			ret, err := instance.HandleIBTP(tx.GetIBTP())
 			// testLogger.Infoln("handel success", i)

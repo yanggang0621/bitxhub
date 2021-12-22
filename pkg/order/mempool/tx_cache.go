@@ -89,7 +89,7 @@ func (tc *TxCache) postTxSet() {
 		Transactions: dst,
 	}
 	tc.TxSetC <- txSet
-	fmt.Printf("=== txSetC len is", len(tc.TxSetC))
+	fmt.Printf("=== txSetC len is %d", len(tc.TxSetC))
 	tc.txSet = make([]pb.Transaction, 0)
 }
 

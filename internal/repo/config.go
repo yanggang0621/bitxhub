@@ -137,6 +137,7 @@ type Genesis struct {
 	Strategy    map[string]string `json:"strategy" toml:"strategy"`
 	Dider       string            `json:"dider" toml:"dider"`
 	MeterWasm   bool              `json:"meter_wasm" toml:"meter_wasm"`
+	VerifyN     uint64            `json:"verify_n" toml:"verify_n"`
 }
 
 type Admin struct {

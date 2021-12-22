@@ -20,10 +20,11 @@ type Context struct {
 	Tx               pb.Transaction
 	Logger           logrus.FieldLogger
 	MeterWasm        bool
+	VerifyN          uint64
 }
 
 // NewContext creates a context of wasm instance
-func NewContext(tx pb.Transaction, txIndex uint64, data *pb.TransactionData, currentHeight uint64, ledger *ledger.Ledger, logger logrus.FieldLogger, meterWasm bool) *Context {
+func NewContext(tx pb.Transaction, txIndex uint64, data *pb.TransactionData, currentHeight uint64, ledger *ledger.Ledger, logger logrus.FieldLogger, meterWasm bool, verifyN uint64) *Context {
 	return &Context{
 		Caller:           tx.GetFrom(),
 		Callee:           tx.GetTo(),
@@ -36,5 +37,6 @@ func NewContext(tx pb.Transaction, txIndex uint64, data *pb.TransactionData, cur
 		Nonce:            tx.GetNonce(),
 		Logger:           logger,
 		MeterWasm:        meterWasm,
+		VerifyN:          verifyN,
 	}
 }
