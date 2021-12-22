@@ -70,6 +70,7 @@ func (exec *BlockExecutor) processExecuteEvent(blockWrapper *BlockWrapper) *ledg
 		"txNum":  len(block.Transactions.Transactions),
 		"time":   time2 - time1,
 		"now":    time.Now().UnixNano(),
+		"n":      exec.verifyN,
 	}).Debug("============================== 1. verify proofs")
 
 	exec.evm = newEvm(block.Height(), uint64(block.BlockHeader.Timestamp), exec.evmChainCfg, exec.ledger.StateLedger, exec.ledger.ChainLedger, exec.admins[0])
