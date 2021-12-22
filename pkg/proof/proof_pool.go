@@ -46,24 +46,24 @@ func (pl *VerifyPool) ValidationEngine() validator.Engine {
 }
 
 func (pl *VerifyPool) CheckProof(tx *pb.Transaction) (bool, error) {
-	ibtp := tx.IBTP
-	if ibtp != nil {
-		ok, err := pl.verifyProof(ibtp, tx.Extra)
-		if err != nil {
-			pl.logger.WithFields(logrus.Fields{
-				"hash":  tx.TransactionHash.String(),
-				"id":    ibtp.ID(),
-				"error": err}).Warn("ibtp verify got error")
-			return false, err
-		}
-		if !ok {
-			pl.logger.WithFields(logrus.Fields{"hash": tx.TransactionHash.String(), "id": ibtp.ID()}).Warn("ibtp verify failed")
-			return false, nil
-		}
-
-		//TODO(jz): need to remove the proof
-		//tx.Extra = nil
-	}
+	//ibtp := tx.IBTP
+	//if ibtp != nil {
+	//	ok, err := pl.verifyProof(ibtp, tx.Extra)
+	//	if err != nil {
+	//		pl.logger.WithFields(logrus.Fields{
+	//			"hash":  tx.TransactionHash.String(),
+	//			"id":    ibtp.ID(),
+	//			"error": err}).Warn("ibtp verify got error")
+	//		return false, err
+	//	}
+	//	if !ok {
+	//		pl.logger.WithFields(logrus.Fields{"hash": tx.TransactionHash.String(), "id": ibtp.ID()}).Warn("ibtp verify failed")
+	//		return false, nil
+	//	}
+	//
+	//	//TODO(jz): need to remove the proof
+	//	//tx.Extra = nil
+	//}
 	return true, nil
 }
 
