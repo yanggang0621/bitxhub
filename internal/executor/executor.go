@@ -261,6 +261,7 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 	for i := 0; i < int(exec.verifyN); i++ {
 		go func(i, j int) {
 			defer wg.Done()
+			fmt.Printf("%d %d \n", i, j)
 			for ; j < (i+1)*num; j++ {
 				if _, ok := blockWrapper.invalidTx[j]; !ok {
 					ok, gasUsed, err := exec.ibtpVerify.CheckProof(txs[j], height, uint64(j))
