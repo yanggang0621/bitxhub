@@ -75,7 +75,7 @@ func NewSimpleLedger(repo *repo.Repo, ldb storage.Storage, accountCache *Account
 	}
 
 	if accountCache == nil {
-		accountCache, err = NewAccountCache()
+		accountCache, err = NewAccountCache(logger)
 		if err != nil {
 			return nil, fmt.Errorf("init account cache failed: %w", err)
 		}

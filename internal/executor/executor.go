@@ -186,7 +186,7 @@ func (exec *BlockExecutor) ApplyReadonlyTransactions(txs []pb.Transaction) []*pb
 	}
 
 	exec.ledger.PrepareBlock(meta.BlockHash, meta.Height)
-	exec.evm = newEvm(meta.Height, uint64(block.BlockHeader.Timestamp), exec.evmChainCfg, exec.ledger.StateLedger, exec.ledger.ChainLedger, exec.admins[0])
+	//exec.evm = newEvm(meta.Height, uint64(block.BlockHeader.Timestamp), exec.evmChainCfg, exec.ledger.StateLedger, exec.ledger.ChainLedger, exec.admins[0])
 	for i, tx := range txs {
 		receipt := exec.applyTransaction(i, tx, "", nil)
 
@@ -237,12 +237,12 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 
 	var (
 		invalidTxs = make([]int, 0)
-		wg         sync.WaitGroup
-		lock       sync.Mutex
+	//	wg         sync.WaitGroup
+	//	lock       sync.Mutex
 	)
 	txs := block.Transactions.Transactions
 
-	wg.Add(len(txs))
+	//wg.Add(len(txs))
 	exec.logger.WithFields(logrus.Fields{
 		"height": block.Height(),
 		"size":   block.Size(),
@@ -252,22 +252,22 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 	height := block.Height()
 	errM := make(map[int]string)
 	for i, tx := range txs {
-		go func(i int, tx pb.Transaction) {
-			defer wg.Done()
-			if _, ok := blockWrapper.invalidTx[i]; !ok {
-				ok, gasUsed, err := exec.ibtpVerify.CheckProof(tx, height, uint64(i))
-				if !ok {
-					lock.Lock()
-					defer lock.Unlock()
-					invalidTxs = append(invalidTxs, i)
-					errM[i] = err.Error()
-				}
-				//exec.logger.WithField("gasUsed", gasUsed).Info("Verify proofs")
-				exec.gasLimit -= gasUsed
+		//go func(i int, tx pb.Transaction) {/
+		//defer wg.Done()
+		if _, ok := blockWrapper.invalidTx[i]; !ok {
+			ok, gasUsed, err := exec.ibtpVerify.CheckProof(tx, height, uint64(i))
+			if !ok {
+				//lock.Lock()
+				//defer lock.Unlock()
+				invalidTxs = append(invalidTxs, i)
+				errM[i] = err.Error()
 			}
-		}(i, tx)
+			//exec.logger.WithField("gasUsed", gasUsed).Info("Verify proofs")
+			exec.gasLimit -= gasUsed
+		}
+		//}(i, tx)
 	}
-	wg.Wait()
+	//wg.Wait()
 	exec.logger.WithFields(logrus.Fields{
 		"height": block.Height(),
 		"size":   block.Size(),

@@ -30,10 +30,9 @@ require (
 	github.com/libp2p/go-libp2p-core v0.5.6
 	github.com/looplab/fsm v0.2.0
 	github.com/magiconair/properties v1.8.4
-	github.com/meshplus/bitxhub-core v1.3.1-0.20211215064024-d163e0660168
+	github.com/meshplus/bitxhub-core v1.3.1-0.20211222080124-18a250925224
 	github.com/meshplus/bitxhub-kit v1.2.1-0.20211125010920-547e4651583e
 	github.com/meshplus/bitxhub-model v1.2.1-0.20211207095229-a43d4b219b66
-	github.com/meshplus/crypto v0.0.8
 	github.com/meshplus/eth-kit v0.0.0-20210906064541-8dfea98dbf95
 	github.com/meshplus/go-libp2p-cert v0.0.0-20210125114242-7d9ed2eaaccd
 	github.com/meshplus/go-lightp2p v0.0.0-20210617153734-471d08b829f8
@@ -77,5 +76,3 @@ replace google.golang.org/grpc => google.golang.org/grpc v1.33.0
 replace github.com/hyperledger/fabric => github.com/hyperledger/fabric v2.0.1+incompatible
 
 replace github.com/wasmerio/wasmer-go v1.0.4 => github.com/meshplus/wasmer-go v1.0.5-0.20210817103436-19ec68f8bfe2
-
-replace github.com/meshplus/bitxhub-core => ../../bitxhub-core
