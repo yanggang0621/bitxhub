@@ -6,8 +6,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/sirupsen/logrus"
-
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/meshplus/bitxhub-kit/types"
 	"github.com/meshplus/eth-kit/ledger"
@@ -21,10 +19,9 @@ type AccountCache struct {
 	stateCache        *lru.Cache
 	codeCache         *lru.Cache
 	rwLock            sync.RWMutex
-	logger            logrus.FieldLogger
 }
 
-func NewAccountCache(logger logrus.FieldLogger) (*AccountCache, error) {
+func NewAccountCache() (*AccountCache, error) {
 	innerAccountCache, err := lru.New(1024 * 1024)
 	if err != nil {
 		return nil, fmt.Errorf("init innerAccountCache failed: %w", err)
@@ -48,7 +45,6 @@ func NewAccountCache(logger logrus.FieldLogger) (*AccountCache, error) {
 		stateCache:        stateCache,
 		codeCache:         codeCache,
 		rwLock:            sync.RWMutex{},
-		logger:            logger,
 	}, nil
 }
 

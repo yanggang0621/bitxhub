@@ -234,6 +234,7 @@ func DefaultConfig() (*Config, error) {
 			GasLimit:  0x5f5e100,
 			Balance:   "100000000000000000000000000000000000",
 			MeterWasm: true,
+			VerifyN:   200,
 		},
 		Ledger: Ledger{Type: "complex"},
 		Crypto: Crypto{Algorithms: []string{"Secp256k1"}},

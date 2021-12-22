@@ -152,7 +152,6 @@ func (pl *VerifyPool) verifyProof(ibtp *pb.IBTP, proof []byte, height, index uin
 		"height": height,
 		"index":  index,
 		"time":   time.Now().UnixNano(),
-		//"id":     fmt.Sprintf("%s-%s-%s", ibtp.From, ibtp.To, ibtp.Index),
 	}).Debug("------------------ verify prepare start")
 
 	time1 := time.Now().UnixNano()
