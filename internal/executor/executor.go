@@ -251,6 +251,7 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 		"size":   block.Size(),
 		"txNum":  len(txs),
 		"time":   time.Now().UnixNano(),
+		"n":      exec.verifyN,
 	}).Debug("------------------ check proof start")
 	height := block.Height()
 	errM := make(map[int]string)
