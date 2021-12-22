@@ -60,7 +60,7 @@ func (exec *BlockExecutor) processExecuteEvent(blockWrapper *BlockWrapper) *ledg
 		"height": block.Height(),
 		"size":   block.Size(),
 		"txNum":  len(block.Transactions.Transactions),
-		"time":   time.Now().UnixNano(),
+		"now":    time.Now().UnixNano(),
 	}).Debug("============================== 0. start")
 	exec.verifyProofs(blockWrapper)
 	time2 := time.Now().UnixNano()
@@ -69,12 +69,19 @@ func (exec *BlockExecutor) processExecuteEvent(blockWrapper *BlockWrapper) *ledg
 		"size":   block.Size(),
 		"txNum":  len(block.Transactions.Transactions),
 		"time":   time2 - time1,
+		"now":    time.Now().UnixNano(),
 	}).Debug("============================== 1. verify proofs")
 
 	exec.evm = newEvm(block.Height(), uint64(block.BlockHeader.Timestamp), exec.evmChainCfg, exec.ledger.StateLedger, exec.ledger.ChainLedger, exec.admins[0])
 	exec.ledger.PrepareBlock(block.BlockHash, block.Height())
 
 	time3 := time.Now().UnixNano()
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"now":    time.Now().UnixNano(),
+	}).Debug("============================== 2. apply [start] transaction")
 	receipts := exec.txsExecutor.ApplyTransactions(block.Transactions.Transactions, blockWrapper.invalidTx)
 	time4 := time.Now().UnixNano()
 	exec.logger.WithFields(logrus.Fields{
@@ -82,6 +89,7 @@ func (exec *BlockExecutor) processExecuteEvent(blockWrapper *BlockWrapper) *ledg
 		"size":   block.Size(),
 		"txNum":  len(block.Transactions.Transactions),
 		"time":   time4 - time3,
+		"now":    time.Now().UnixNano(),
 	}).Debug("============================== 2. apply transaction")
 
 	applyTxsDuration.Observe(float64(time.Since(current)) / float64(time.Second))
@@ -92,6 +100,12 @@ func (exec *BlockExecutor) processExecuteEvent(blockWrapper *BlockWrapper) *ledg
 
 	calcMerkleStart := time.Now()
 	time5 := time.Now().UnixNano()
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"now":    time.Now().UnixNano(),
+	}).Debug("============================== 3. build [start] tx merkle tree")
 	l1Root, l2Roots, err := exec.buildTxMerkleTree(block.Transactions.Transactions)
 	if err != nil {
 		panic(err)
@@ -102,9 +116,16 @@ func (exec *BlockExecutor) processExecuteEvent(blockWrapper *BlockWrapper) *ledg
 		"size":   block.Size(),
 		"txNum":  len(block.Transactions.Transactions),
 		"time":   time6 - time5,
+		"now":    time.Now().UnixNano(),
 	}).Debug("============================== 3. build tx merkle tree")
 
 	time7 := time.Now().UnixNano()
+	exec.logger.WithFields(logrus.Fields{
+		"height": block.Height(),
+		"size":   block.Size(),
+		"txNum":  len(block.Transactions.Transactions),
+		"now":    time.Now().UnixNano(),
+	}).Debug("============================== 4. calc [start] receipt merkle root")
 	receiptRoot, err := exec.calcReceiptMerkleRoot(receipts)
 	if err != nil {
 		panic(err)
@@ -115,6 +136,7 @@ func (exec *BlockExecutor) processExecuteEvent(blockWrapper *BlockWrapper) *ledg
 		"size":   block.Size(),
 		"txNum":  len(block.Transactions.Transactions),
 		"time":   time8 - time7,
+		"now":    time.Now().UnixNano(),
 	}).Debug("============================== 4. calc receipt merkle root")
 
 	calcMerkleDuration.Observe(float64(time.Since(calcMerkleStart)) / float64(time.Second))
