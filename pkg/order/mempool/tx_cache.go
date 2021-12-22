@@ -1,6 +1,7 @@
 package mempool
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/meshplus/bitxhub-model/pb"
@@ -88,6 +89,7 @@ func (tc *TxCache) postTxSet() {
 		Transactions: dst,
 	}
 	tc.TxSetC <- txSet
+	fmt.Printf("============================================================================================= ", len(tc.TxSetC))
 	tc.txSet = make([]pb.Transaction, 0)
 }
 

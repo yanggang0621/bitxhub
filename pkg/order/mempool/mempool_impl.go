@@ -92,6 +92,7 @@ func (mpi *mempoolImpl) ProcessTransactions(txs []pb.Transaction, isLeader, isLo
 	// Process all the new transaction and merge any errors into the original slice
 	dirtyAccounts := mpi.txStore.insertTxs(validTxs, isLocal)
 
+	mpi.logger.Errorf("mempool size is %d", mpi.poolSize)
 	// send tx to mempool store
 	mpi.processDirtyAccount(dirtyAccounts)
 

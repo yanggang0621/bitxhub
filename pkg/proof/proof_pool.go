@@ -152,9 +152,10 @@ func (pl *VerifyPool) verifyProof(ibtp *pb.IBTP, proof []byte, height, index uin
 		"height": height,
 		"index":  index,
 		"time":   time.Now().UnixNano(),
-		"id":     fmt.Sprintf("%s-%s-%s", ibtp.From, ibtp.To, ibtp.Index),
+		//"id":     fmt.Sprintf("%s-%s-%s", ibtp.From, ibtp.To, ibtp.Index),
 	}).Debug("------------------ verify prepare start")
 
+	time1 := time.Now().UnixNano()
 	if proof == nil {
 		return false, 0, fmt.Errorf("%s: empty proof", ProofError)
 	}
@@ -163,10 +164,16 @@ func (pl *VerifyPool) verifyProof(ibtp *pb.IBTP, proof []byte, height, index uin
 		return false, 0, fmt.Errorf("%s: proof hash is not correct", ProofError)
 	}
 
+	time2 := time.Now().UnixNano()
+	pl.logger.WithFields(logrus.Fields{}).Debugf("----- 12 %d", time2-time1)
+
 	// get real appchain id for union ibtp
 	if err := ibtp.CheckServiceID(); err != nil {
 		return false, 0, fmt.Errorf("check serviceID failed: %w", err)
 	}
+
+	time3 := time.Now().UnixNano()
+	pl.logger.WithFields(logrus.Fields{}).Debugf("----- 23 %d", time3-time2)
 
 	var (
 		bxhID   string
@@ -179,6 +186,9 @@ func (pl *VerifyPool) verifyProof(ibtp *pb.IBTP, proof []byte, height, index uin
 		bxhID, chainID, _ = ibtp.ParseTo()
 	}
 
+	time4 := time.Now().UnixNano()
+	pl.logger.WithFields(logrus.Fields{}).Debugf("----- 34 %d", time4-time3)
+
 	if bxhID != pl.bitxhubID {
 		app, err := pl.getAppchain(bxhID)
 		if err != nil {
@@ -187,10 +197,16 @@ func (pl *VerifyPool) verifyProof(ibtp *pb.IBTP, proof []byte, height, index uin
 		return pl.verifyMultiSign(app, ibtp, proof)
 	}
 
+	time5 := time.Now().UnixNano()
+	pl.logger.WithFields(logrus.Fields{}).Debugf("----- 45 %d", time5-time4)
+
 	app, err := pl.getAppchain(chainID)
 	if err != nil {
 		return false, 0, fmt.Errorf("get appchain %s failed: %w", chainID, err)
 	}
+
+	time6 := time.Now().UnixNano()
+	pl.logger.WithFields(logrus.Fields{}).Debugf("----- 56 %d", time6-time5)
 
 	validateAddr, err := pl.getValidateAddress(chainID)
 	if err != nil {
@@ -199,16 +215,21 @@ func (pl *VerifyPool) verifyProof(ibtp *pb.IBTP, proof []byte, height, index uin
 
 	//fmt.Println(pl.ledger.Copy().GetCode(types.NewAddressByStr(validateAddr)))
 
+	time7 := time.Now().UnixNano()
+	pl.logger.WithFields(logrus.Fields{}).Debugf("----- 67 %d", time7-time6)
+
 	ibtpBytes, err := ibtp.Marshal()
 	if err != nil {
 		return false, 0, fmt.Errorf("marshal ibtp: %w", err)
 	}
 
+	time8 := time.Now().UnixNano()
+	pl.logger.WithFields(logrus.Fields{}).Debugf("----- 78 %d", time8-time7)
 	pl.logger.WithFields(logrus.Fields{
 		"height": height,
 		"index":  index,
-		"time":   time.Now().UnixNano(),
-		"id":     fmt.Sprintf("%s-%s-%s", ibtp.From, ibtp.To, ibtp.Index),
+		"time":   time8 - time1,
+		//"id":     fmt.Sprintf("%s-%s-%s", ibtp.From, ibtp.To, ibtp.Index),
 	}).Debug("------------------ verify prepare end")
 
 	ok, gasUsed, err := pl.ve.Validate(validateAddr, chainID, proof, ibtpBytes, string(app.TrustRoot), index, height)

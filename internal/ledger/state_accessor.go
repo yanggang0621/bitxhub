@@ -9,7 +9,6 @@ import (
 	"sort"
 	"sync"
 
-	lru "github.com/hashicorp/golang-lru"
 	"github.com/meshplus/bitxhub-kit/types"
 	"github.com/meshplus/bitxhub-model/pb"
 	"github.com/meshplus/eth-kit/ledger"
@@ -249,21 +248,21 @@ func (l *SimpleLedger) FlushDirtyData() (map[string]ledger.IAccount, *types.Hash
 	l.blockJournals.Store(blockJournal.ChangedHash.String(), blockJournal)
 	l.prevJnlHash = blockJournal.ChangedHash
 	l.Clear()
-	fmt.Println(len(dirtyAccounts))
-	fmt.Println(dirtyAccounts)
+	//fmt.Println(len(dirtyAccounts))
+	//fmt.Println(dirtyAccounts)
 	l.accountCache.add(dirtyAccounts)
 
 	// fmt.Println(l.accountCache.states)
-	fmt.Println(len(l.accountCache.states["0x000000000000000000000000000000000000000F"]))
-	totalSize := 0
-	for _, value := range l.accountCache.states["0x000000000000000000000000000000000000000F"] {
-		totalSize += len(value)
-	}
-	fmt.Println(totalSize)
-	sc, ok := l.accountCache.stateCache.Get("0x000000000000000000000000000000000000000F")
-	if ok {
-		fmt.Println(sc.(*lru.Cache).Len())
-	}
+	//fmt.Println(len(l.accountCache.states["0x000000000000000000000000000000000000000F"]))
+	//totalSize := 0
+	//for _, value := range l.accountCache.states["0x000000000000000000000000000000000000000F"] {
+	//	totalSize += len(value)
+	//}
+	//fmt.Println(totalSize)
+	//sc, ok := l.accountCache.stateCache.Get("0x000000000000000000000000000000000000000F")
+	//if ok {
+	//fmt.Println(sc.(*lru.Cache).Len())
+	//}
 
 	return dirtyAccounts, blockJournal.ChangedHash
 }
