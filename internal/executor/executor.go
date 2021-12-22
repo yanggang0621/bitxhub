@@ -257,12 +257,11 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 	errM := make(map[int]string)
 
 	num := len(txs) / int(exec.verifyN)
-	j := 0
 	for i := 0; i < int(exec.verifyN); i++ {
-		go func(i, j int) {
+		go func(i int) {
 			defer wg.Done()
-			fmt.Printf("%d %d \n", i, j)
-			for ; j < (i+1)*num; j++ {
+			for j := i * num; j < (i+1)*num; j++ {
+				fmt.Printf("%d %d \n", i, j)
 				if _, ok := blockWrapper.invalidTx[j]; !ok {
 					ok, gasUsed, err := exec.ibtpVerify.CheckProof(txs[j], height, uint64(j))
 					if !ok {
@@ -279,7 +278,7 @@ func (exec *BlockExecutor) verifyProofs(blockWrapper *BlockWrapper) {
 				}
 			}
 
-		}(i, j)
+		}(i)
 	}
 	//for i, tx := range txs {
 	//	go func(i int, tx pb.Transaction) {
